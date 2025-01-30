@@ -8,42 +8,69 @@
 import SwiftUI
 
 struct ContentView: View {
-    let emojis = ["😃", "☹️", "😎", "😂", "😃", "☹️", "😎", "😂"]
-    @State var cardCount = 4
+    let sportsThemeEmojis = ["⚽️", "🏀", "🏈", "🥎", "⚽️", "🏀", "🏈", "🥎", "⚽️", "🏀", "🏈", "🥎", "⚽️", "🏀", "🏈", "🥎"]
+    let foodThemeEmojis = ["🍎", "🍌", "🍊", "🍋", "🍎", "🍌", "🍊", "🍋", "🍎", "🍌", "🍊", "🍋", "🍎", "🍌", "🍊", "🍋"]
+    let movieThemeEmojis = ["🎬", "🎥", "🎞️", "🎟️", "🎬", "🎥", "🎞️", "🎟️", "🎬", "🎥", "🎞️", "🎟️", "🎬", "🎥", "🎞️", "🎟️"]
+    @State var emojis: Array<String> = []
+    //@State var cardCount = 4
+    
     var body: some View {
         VStack {
+            Text("Memorize!")
+                .font(.largeTitle)
+            
             ScrollView {
                 cards
             }
+            
             Spacer()
-            cardCountAdjusters
+            
+            themeButtons
         }
         .padding()
 
     }
     
-    var cardCountAdjusters: some View {
-        HStack {
-            cardAdder
-            Spacer()
-            cardRemover
-            
-        }
-        .font(.largeTitle)
-    }
-    
-    func cardCountAdjuster(by offset: Int, name: String, systemImage: String) -> some View {
-        Button(name, systemImage: systemImage, action: {
-            cardCount += offset
-            
-        })
-        .disabled(cardCount + offset < 1 || cardCount + offset > emojis.count)
+    var themeButtons: some View {
+        HStack(alignment: .lastTextBaseline) {
+            Button {
+                emojis = sportsThemeEmojis.shuffled()
+            } label: {
+                VStack {
+                    Image(systemName: "figure.badminton")
+                    Text("Sports")
+                        .font(.caption)
+                }
+            }
+            .padding(.horizontal)
 
+            Button {
+                emojis = movieThemeEmojis.shuffled()
+            } label: {
+                VStack {
+                    Image(systemName: "popcorn")
+                    Text("Movies")
+                        .font(.caption)
+                }
+            }
+            .padding(.horizontal)
+
+            Button {
+                emojis = foodThemeEmojis.shuffled()
+            } label: {
+                VStack {
+                    Image(systemName: "fork.knife")
+                    Text("Food")
+                        .font(.caption)
+                }
+            }
+            .padding(.horizontal)
+        }
     }
     
     var cards: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 120))]) {
-            ForEach(0..<cardCount, id: \.self) { index in
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
+            ForEach(0..<emojis.count, id: \.self) { index in
                 CardView(content: emojis[index])
                     .aspectRatio(2/3, contentMode: .fit)
             }
@@ -51,13 +78,6 @@ struct ContentView: View {
         .foregroundStyle(.orange)
     }
     
-    var cardAdder: some View {
-        cardCountAdjuster(by: 1, name: "Add", systemImage: "plus.rectangle.fill")
-    }
-    
-    var cardRemover: some View {
-        cardCountAdjuster(by: -1, name: "Remove", systemImage: "minus.rectangle.fill")
-    }
 }
 
 struct CardView: View {
