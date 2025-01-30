@@ -8,6 +8,7 @@
 import SwiftUI
 
 class EmojiMemoryGame: ObservableObject {
+    
     private static let emojis = ["🎬", "🎥", "🎞️", "🎟️"]
     
     private static func createMemoryGame() -> MemoryGame<String> {
