@@ -26,15 +26,21 @@ struct EmojiMemoryGameView: View {
                     viewModel.shuffle()
                     print(viewModel.cards)
                 }
+                .padding()
+                .background(.indigo)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .padding(.horizontal)
+                
                 Button("New Game") {
                     viewModel.newGame()
                 }
                 .padding()
-                .background(Color.yellow)
-                .clipShape(RoundedRectangle(cornerRadius: 2))
-                
+                .background(.indigo)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
+            .foregroundStyle(.white)
         }
+        
         .padding()
 
     }
