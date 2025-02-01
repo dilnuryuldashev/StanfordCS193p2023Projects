@@ -12,7 +12,7 @@ struct EmojiMemoryGameView: View {
     
     var body: some View {
         VStack {
-            Text("Memorize!")
+            Text(viewModel.nameOfTheme)
                 .font(.largeTitle)
             
             ScrollView {
@@ -21,52 +21,23 @@ struct EmojiMemoryGameView: View {
             }
             
             //Spacer()
-            
-            Button("Shuffle") {
-                viewModel.shuffle()
-                print(viewModel.cards)
+            HStack {
+                Button("Shuffle") {
+                    viewModel.shuffle()
+                    print(viewModel.cards)
+                }
+                Button("New Game") {
+                    viewModel.newGame()
+                }
+                .padding()
+                .background(Color.yellow)
+                .clipShape(RoundedRectangle(cornerRadius: 2))
+                
             }
         }
         .padding()
 
     }
-    
-//    var themeButtons: some View {
-//        HStack(alignment: .lastTextBaseline) {
-//            Button {
-//                emojis = sportsThemeEmojis.shuffled()
-//            } label: {
-//                VStack {
-//                    Image(systemName: "figure.badminton")
-//                    Text("Sports")
-//                        .font(.caption)
-//                }
-//            }
-//            .padding(.horizontal)
-//
-//            Button {
-//                emojis = movieThemeEmojis.shuffled()
-//            } label: {
-//                VStack {
-//                    Image(systemName: "popcorn")
-//                    Text("Movies")
-//                        .font(.caption)
-//                }
-//            }
-//            .padding(.horizontal)
-//
-//            Button {
-//                emojis = foodThemeEmojis.shuffled()
-//            } label: {
-//                VStack {
-//                    Image(systemName: "fork.knife")
-//                    Text("Food")
-//                        .font(.caption)
-//                }
-//            }
-//            .padding(.horizontal)
-//        }
-//    }
     
     var cards: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 85), spacing: 0)]) {
