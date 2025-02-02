@@ -21,6 +21,12 @@ struct EmojiMemoryGameView: View {
             }
             
             //Spacer()
+            
+            HStack {
+                Text("Score: \(viewModel.score)")
+                .padding()
+                .font(.title)
+            }
             HStack {
                 Button("Shuffle") {
                     viewModel.shuffle()
@@ -56,7 +62,7 @@ struct EmojiMemoryGameView: View {
                     }
             }
         }
-        .foregroundStyle(.orange)
+        .foregroundStyle(viewModel.themeColor)
     }
     
 }
