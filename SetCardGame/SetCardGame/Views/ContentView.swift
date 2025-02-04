@@ -13,6 +13,7 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             Color.purple
+                .ignoresSafeArea()
             
             VStack {
                 cards
@@ -21,11 +22,10 @@ struct ContentView: View {
             .foregroundStyle(.blue)
             .padding()
         }
-        .ignoresSafeArea()
     }
     
     private var cards: some View {
-        AspectVGrid(viewModel.cards, aspectRatio: 2.0/3.0) { card in
+        AspectVGrid(viewModel.cards, aspectRatio: 3.0/2) { card in
             CardView(card: card)
                 .padding(4)
             
@@ -49,11 +49,15 @@ struct CardView: View {
                 base.fill(.white)
                 base
                     .strokeBorder(lineWidth: 2)
-                Text(card.content.color.description)
-                    .font(.system(size: 200))
-                    .foregroundStyle(.black)
-                    .minimumScaleFactor(0.01)
-                    .aspectRatio(1, contentMode: .fit)
+                HStack {
+                    ForEach(1...(card.content.number), id: \.self) {_ in
+                        // draw the shape number times
+                        shapeView(for: card.content.shape, color: card.content.color)
+                        //.fill(card.content.color)
+                            .frame(width: 60, height: 60)
+                        
+                    }
+                }
                 
             }
             .opacity(card.isFaceUp ? 1 : 0)
@@ -63,6 +67,23 @@ struct CardView: View {
         .opacity(card.isFaceUp || !card.isMatched ? 1 : 0)
     }
     
+    @ViewBuilder
+    func shapeView(for shapeType: CardContent.ShapeType, color: Color) -> some View {
+            switch shapeType {
+            case .diamond:
+                Rectangle()
+                    .foregroundStyle(color)
+
+            case .oval:
+                Capsule(style: .circular)
+                    .foregroundStyle(color)
+
+            case .squiggle:
+                Circle()
+                    .foregroundStyle(color)
+
+            }
+        }
 }
 
 #Preview {

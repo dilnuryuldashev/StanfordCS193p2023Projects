@@ -20,15 +20,22 @@ struct CardContent {
         empty
     }
     
+    enum ShapeType {
+        case diamond
+        case oval
+        case squiggle
+    }
+
+    
     var color: Color
-    var shape: any Shape
+    var shape: ShapeType
     var shading: Shading
     var number: Int
     
 }
 
 class SetGameViewModel: ObservableObject {
-    static var tempCards = [SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: Rectangle(), shading: .empty, number: 3))
+    static var tempCards = [SetGame<CardContent>.Card(content: CardContent(color: .red, shape: .diamond, shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: .oval, shading: .empty, number: 3)), SetGame<CardContent>.Card(content: CardContent(color: .red, shape: .squiggle, shading: .empty, number: 3))
     ]
     
     static func createSetGame() -> SetGame<CardContent> {
