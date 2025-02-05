@@ -12,12 +12,10 @@ struct SetGameView: View {
     
     var body: some View {
         VStack {
-//            Color.yellow
-//                .ignoresSafeArea()
             
             ScrollView {
                 cards
-                    .animation(.default, value: viewModel.cards)
+                    .animation(.default, value: viewModel.cardsInPlay)
             }
             .padding()
 
@@ -38,8 +36,6 @@ struct SetGameView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .foregroundStyle(.white)
-            
-            
             .padding()
         }
     }
@@ -48,7 +44,7 @@ struct SetGameView: View {
     
     var cards: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 0)]) {
-            ForEach(viewModel.cards) { card in
+            ForEach(viewModel.cardsInPlay) { card in
                 CardView(card)
                     .aspectRatio(3/2, contentMode: .fit)
                     .padding(4)
@@ -80,7 +76,7 @@ struct CardView: View {
                     .strokeBorder(lineWidth: 2)
                 HStack {
                     ForEach(1...(card.content.number), id: \.self) {_ in
-                        // draw the shape number times
+                        // TODO: properly draw the shapes
                         shapeView(for: card.content.shape, color: card.content.color)
                             .frame(width: 20, height: 20)
                         

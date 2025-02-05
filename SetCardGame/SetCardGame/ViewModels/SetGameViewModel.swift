@@ -13,9 +13,23 @@ import SwiftUI
  */
 
 
+
 struct CardContent: Equatable {
     static let colorOptions = [Color.red, Color.green, Color.purple]
     static let numberOptions = [1, 2, 3]
+    
+    // we need three way comparison
+    // set = features all same or all different
+    static func isSet (_ first: CardContent, _ second: CardContent, _ third: CardContent) -> Bool {
+        return ((first.color != second.color && first.color != third.color && second.color != third.color) ||
+        (first.color == second.color && first.color == third.color)) &&
+        ((first.number != second.number && first.number != third.number && second.number != third.number) ||
+        (first.number == second.number && first.number == third.number)) &&
+        ((first.shape != second.shape && first.shape != third.shape && second.shape != third.shape) ||
+        (first.shape == second.shape && first.shape == third.shape)) &&
+        ((first.shading != second.shading && first.shading != third.shading && second.shading != third.shading) ||
+        (first.shading == second.shading && first.shading == third.shading))
+    }
 
     enum Shading: CaseIterable {
         case striped,
@@ -38,7 +52,7 @@ struct CardContent: Equatable {
 }
 
 class SetGameViewModel: ObservableObject {
-    private let visibleCardsCount = 12
+    private static let visibleCardsCount = 12
     /**
      The deck consists of 81 unique cards that vary in four features across three possibilities for each kind of feature:
      number of shapes (one, two, or three),
@@ -64,7 +78,7 @@ class SetGameViewModel: ObservableObject {
     }
     
     static func createSetGame(_ cards: [SetGame<CardContent>.Card]) -> SetGame<CardContent> {
-        return SetGame<CardContent>(cards: cards)
+        return SetGame<CardContent>(cards, visibleCardsCount)
     }
     
     @Published private var model: SetGame<CardContent>
@@ -76,12 +90,8 @@ class SetGameViewModel: ObservableObject {
         shuffle()
     }
     
-    var cards: [SetGame<CardContent>.Card] {
-        model.cards
-    }
-    
-    var visibleCards: [SetGame<CardContent>.Card] {
-        Array(cards.shuffled()[0..<visibleCardsCount])
+    var cardsInPlay: [SetGame<CardContent>.Card] {
+        model.cardsToShow
     }
     
     func chooseCard(_ card: SetGame<CardContent>.Card) {

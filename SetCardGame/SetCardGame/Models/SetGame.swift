@@ -10,13 +10,20 @@ import Foundation
 
 struct SetGame<CardContent: Equatable> {
     private(set) var cards: Array<Card>
-    
-    init(cards: [SetGame.Card]) {
+    var cardsInPlay: Int
+
+    init(_ cards: [SetGame.Card], _ cardsInPlay: Int) {
         self.cards = cards
+        self.cardsInPlay = cardsInPlay
     }
     
+    // TODO: shuffle the visible cards
     mutating func shuffle() {
         cards.shuffle()
+    }
+    
+    var cardsToShow: Array<Card> {
+        Array(cards[0..<cardsInPlay])
     }
     
     mutating func chooseCard(card: Card) {
