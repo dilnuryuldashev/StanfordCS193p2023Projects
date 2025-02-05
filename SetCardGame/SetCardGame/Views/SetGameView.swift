@@ -7,29 +7,58 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    @ObservedObject var viewModel = SetGameViewModel()
+struct SetGameView: View {
+    @ObservedObject var viewModel: SetGameViewModel
     
     var body: some View {
-        ZStack {
-            Color.purple
-                .ignoresSafeArea()
+        VStack {
+//            Color.yellow
+//                .ignoresSafeArea()
             
-            VStack {
+            ScrollView {
                 cards
-                
+                    .animation(.default, value: viewModel.cards)
             }
-            .foregroundStyle(.blue)
+            .padding()
+
+            
+            HStack {
+                Button("Shuffle") {
+                    viewModel.shuffle()
+                }
+                .padding(10)
+                .background(.blue)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                Button("New Game") {
+                    viewModel.newGame()
+                }
+                .padding(10)
+                .background(.blue)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .foregroundStyle(.white)
+            
+            
             .padding()
         }
     }
     
-    private var cards: some View {
-        AspectVGrid(viewModel.cards, aspectRatio: 3.0/2) { card in
-            CardView(card: card)
-                .padding(4)
-            
+
+    
+    var cards: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 0)]) {
+            ForEach(viewModel.cards) { card in
+                CardView(card)
+                    .aspectRatio(3/2, contentMode: .fit)
+                    .padding(4)
+                    .onTapGesture {
+                        viewModel.chooseCard(card)
+                    }
+            }
         }
+        .foregroundStyle(.blue)
+
     }
     
     
@@ -38,7 +67,7 @@ struct ContentView: View {
 struct CardView: View {
     let card: SetGame<CardContent>.Card
     
-    init(card: SetGame<CardContent>.Card) {
+    init(_ card: SetGame<CardContent>.Card) {
         self.card = card
     }
     
@@ -53,8 +82,7 @@ struct CardView: View {
                     ForEach(1...(card.content.number), id: \.self) {_ in
                         // draw the shape number times
                         shapeView(for: card.content.shape, color: card.content.color)
-                        //.fill(card.content.color)
-                            .frame(width: 60, height: 60)
+                            .frame(width: 20, height: 20)
                         
                     }
                 }
@@ -66,6 +94,7 @@ struct CardView: View {
         }
         .opacity(card.isFaceUp || !card.isMatched ? 1 : 0)
     }
+    
     
     @ViewBuilder
     func shapeView(for shapeType: CardContent.ShapeType, color: Color) -> some View {
@@ -87,5 +116,5 @@ struct CardView: View {
 }
 
 #Preview {
-    ContentView()
+    SetGameView(viewModel: SetGameViewModel())
 }
