@@ -13,11 +13,14 @@ struct SetGameView: View {
     var body: some View {
         VStack {
             
-            ScrollView {
-                cards
-                    .animation(.default, value: viewModel.cardsInPlay)
-            }
-            .padding()
+            Text("Score: \(viewModel.score)")
+                .font(.title)
+                .padding()
+            cards
+                .animation(.default, value: viewModel.cardsInPlay)
+                .padding()
+            
+            Spacer()
 
             
             HStack {
@@ -43,7 +46,7 @@ struct SetGameView: View {
 
     
     var cards: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 0)]) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 0)]) {
             ForEach(viewModel.cardsInPlay) { card in
                 CardView(card)
                     .aspectRatio(3/2, contentMode: .fit)
@@ -74,14 +77,19 @@ struct CardView: View {
                 base.fill(.white)
                 base
                     .strokeBorder(lineWidth: 2)
-                HStack {
-                    ForEach(1...(card.content.number), id: \.self) {_ in
-                        // TODO: properly draw the shapes
-                        shapeView(for: card.content.shape, color: card.content.color)
-                            .frame(width: 20, height: 20)
+                GeometryReader { geometry in
+                    HStack(spacing: 8) {
+                        ForEach(1...(card.content.number), id: \.self) {_ in
+                            // TODO: properly draw the shapes
+                            shapeView(for: card.content.shape, color: card.content.color)
+                                .frame(width: geometry.size.height/3.5, height: geometry.size.width/3.5)
+                                .padding(3)
+                        }
                         
                     }
+                    .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
                 }
+                
                 
             }
             .opacity(card.isFaceUp ? 1 : 0)
@@ -97,10 +105,12 @@ struct CardView: View {
             switch shapeType {
             case .diamond:
                 Rectangle()
+                    .aspectRatio(1, contentMode: .fit)
                     .foregroundStyle(color)
+                    .rotationEffect(Angle.degrees(45))
 
             case .oval:
-                Capsule(style: .circular)
+                Ellipse()
                     .foregroundStyle(color)
 
             case .squiggle:

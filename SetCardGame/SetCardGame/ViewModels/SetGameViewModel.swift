@@ -94,6 +94,10 @@ class SetGameViewModel: ObservableObject {
         model.cardsToShow
     }
     
+    var score: Int {
+        model.score
+    }
+    
     func chooseCard(_ card: SetGame<CardContent>.Card) {
         model.chooseCard(card: card)
     }

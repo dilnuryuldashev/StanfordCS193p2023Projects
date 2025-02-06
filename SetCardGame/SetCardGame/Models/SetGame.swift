@@ -9,12 +9,14 @@
 import Foundation
 
 struct SetGame<CardContent: Equatable> {
+    private(set) var score: Int
     private(set) var cards: Array<Card>
     var cardsInPlay: Int
 
     init(_ cards: [SetGame.Card], _ cardsInPlay: Int) {
         self.cards = cards
         self.cardsInPlay = cardsInPlay
+        score = 0
     }
     
     // TODO: shuffle the visible cards
