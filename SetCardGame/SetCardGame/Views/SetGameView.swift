@@ -92,11 +92,13 @@ struct CardView: View {
                 
                 
             }
-            .opacity(card.isFaceUp ? 1 : 0)
+            // TODO: this code was for hiding the cards
+            // We really need to delete them from the deck now, not just hide
+            //.opacity(card.isChosen ? 1 : 0)
             
-            base.fill().opacity(card.isFaceUp ? 0 : 1)
+            base.fill().opacity(card.isChosen ? 0.4 : 0)
         }
-        .opacity(card.isFaceUp || !card.isMatched ? 1 : 0)
+        .opacity(card.isChosen || !card.isMatched ? 1 : 0)
     }
     
     

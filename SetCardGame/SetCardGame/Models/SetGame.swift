@@ -32,7 +32,7 @@ struct SetGame<CardContent: Equatable> {
         let chosenCardIndex: Int? = cards.firstIndex(of: card)
         
         if let chosenCardIndex {
-            cards[chosenCardIndex].isFaceUp.toggle()
+            cards[chosenCardIndex].isChosen.toggle()
         }
     }
     
@@ -40,6 +40,6 @@ struct SetGame<CardContent: Equatable> {
         var id: String
         var content: CardContent
         var isMatched: Bool = false
-        var isFaceUp: Bool = true
+        var isChosen: Bool = false
     }
 }
