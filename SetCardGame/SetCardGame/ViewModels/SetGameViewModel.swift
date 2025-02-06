@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 /**
+ Source: Wikipedia
  In the game, certain combinations of three cards are said to make up a "set". For each one of the four categories of features—color, number, shape, and shading—the three cards must display that feature as either a) all the same, or b) all different. Put another way: For each feature the three cards must avoid having two cards showing one version of the feature and the remaining card showing a different version.
  */
 
@@ -53,7 +54,10 @@ struct CardContent: Equatable {
 
 class SetGameViewModel: ObservableObject {
     private static let visibleCardsCount = 12
+    private static let maxVisibleCardsCount = 18 // no more dealing after this point
+
     /**
+     Source: Wikipedia
      The deck consists of 81 unique cards that vary in four features across three possibilities for each kind of feature:
      number of shapes (one, two, or three),
      shape (diamond, squiggle, oval),
@@ -78,7 +82,7 @@ class SetGameViewModel: ObservableObject {
     }
     
     static func createSetGame(_ cards: [SetGame<CardContent>.Card]) -> SetGame<CardContent> {
-        return SetGame<CardContent>(cards, visibleCardsCount, CardContent.isSet(_:_:_:))
+        return SetGame<CardContent>(cards, visibleCardsCount, maxVisibleCardsCount, CardContent.isSet(_:_:_:))
     }
     
     @Published private var model: SetGame<CardContent>
@@ -102,7 +106,37 @@ class SetGameViewModel: ObservableObject {
         model.chooseCard(card: card)
     }
     
-    func shuffle() {
+    // Show one SET forming three cards for one second
+    // and then reset their states
+    func cheat() {
+        let (i, j, k) = model.getSetFormingTripleIDs()
+        
+        Task {
+            model.setHintState(i, true)
+            model.setHintState(j, true)
+            model.setHintState(k, true)
+
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            
+            model.setHintState(i, false)
+            model.setHintState(j, false)
+            model.setHintState(k, false)
+        }
+    }
+    
+    var deckSize: Int {
+        model.cards.count
+    }
+    
+    var canDealThreeCards: Bool {
+        model.cardsToShow.count < SetGameViewModel.maxVisibleCardsCount
+    }
+    
+    func dealThreeCards() {
+        model.dealThreeCards()
+    }
+    
+    private func shuffle() {
         model.shuffle()
     }
     

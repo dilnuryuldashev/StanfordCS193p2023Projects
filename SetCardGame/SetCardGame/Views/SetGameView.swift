@@ -12,10 +12,16 @@ struct SetGameView: View {
     
     var body: some View {
         VStack {
-            
-            Text("Score: \(viewModel.score)")
-                .font(.title)
-                .padding()
+            HStack {
+                Text("Score: \(viewModel.score)")
+                    .font(.title2)
+                    .padding()
+                Spacer()
+                Text("Deck: \(viewModel.deckSize) cards")
+                    .font(.title2)
+                    .padding()
+            }
+            .padding()
             cards
                 .animation(.default, value: viewModel.cardsInPlay)
                 .padding()
@@ -24,12 +30,16 @@ struct SetGameView: View {
 
             
             HStack {
-                Button("Shuffle") {
-                    viewModel.shuffle()
+                Button("Deal 3 More") {
+                    viewModel.dealThreeCards()
                 }
                 .padding(10)
                 .background(.blue)
+                .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
+                .disabled(!viewModel.canDealThreeCards)
+                .opacity(!viewModel.canDealThreeCards ? 0.5 : 1)
+
 
                 Button("New Game") {
                     viewModel.newGame()
@@ -37,8 +47,17 @@ struct SetGameView: View {
                 .padding(10)
                 .background(.blue)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
+                .foregroundStyle(.white)
+                
+                Button("Cheat") {
+                    viewModel.cheat()
+                }
+                .padding(10)
+                .background(.blue)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .foregroundStyle(.white)
+
             }
-            .foregroundStyle(.white)
             .padding()
         }
     }
@@ -92,13 +111,11 @@ struct CardView: View {
                 
                 
             }
-            // TODO: this code was for hiding the cards
-            // We really need to delete them from the deck now, not just hide
-            //.opacity(card.isChosen ? 1 : 0)
             
             base.fill().opacity(card.isChosen ? 0.4 : 0)
+            base.fill(.red).opacity(card.isHinted ? 0.4 : 0)
+
         }
-        .opacity(card.isChosen || !card.isMatched ? 1 : 0)
     }
     
     func getOpacity(_ shading: CardContent.Shading) -> Double {
