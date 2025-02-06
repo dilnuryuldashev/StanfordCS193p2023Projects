@@ -11,11 +11,15 @@ import Foundation
 struct SetGame<CardContent: Equatable> {
     private(set) var score: Int
     private(set) var cards: Array<Card>
+    private(set) var chosenCardIndices: Array<Int> = []
+    private let isSet: (CardContent, CardContent, CardContent) -> Bool
+    
     var cardsInPlay: Int
 
-    init(_ cards: [SetGame.Card], _ cardsInPlay: Int) {
+    init(_ cards: [SetGame.Card], _ cardsInPlay: Int, _ isSet: @escaping (CardContent, CardContent, CardContent) -> Bool) {
         self.cards = cards
         self.cardsInPlay = cardsInPlay
+        self.isSet = isSet
         score = 0
     }
     
@@ -33,6 +37,21 @@ struct SetGame<CardContent: Equatable> {
         
         if let chosenCardIndex {
             cards[chosenCardIndex].isChosen.toggle()
+            if cards[chosenCardIndex].isChosen {
+                chosenCardIndices.append(chosenCardIndex)
+                if chosenCardIndices.count == 3 {
+                    if isSet(cards[chosenCardIndices[0]].content, cards[chosenCardIndices[1]].content, cards[chosenCardIndices[2]].content) {
+                        print("SetGame-chooseCard: is set!")
+                    } else {
+                        print("SetGame-chooseCard: not a set")
+                    }
+                    
+                    // Empty the array as we will chose new three cards
+                    chosenCardIndices.removeAll()
+
+                }
+            }
+            
         }
     }
     

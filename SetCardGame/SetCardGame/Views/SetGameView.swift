@@ -81,7 +81,7 @@ struct CardView: View {
                     HStack(spacing: 8) {
                         ForEach(1...(card.content.number), id: \.self) {_ in
                             // TODO: properly draw the shapes
-                            shapeView(for: card.content.shape, color: card.content.color)
+                            shapeView(shape: card.content.shape, color: card.content.color, shading: card.content.shading)
                                 .frame(width: geometry.size.height/3.5, height: geometry.size.width/3.5)
                                 .padding(3)
                         }
@@ -101,25 +101,46 @@ struct CardView: View {
         .opacity(card.isChosen || !card.isMatched ? 1 : 0)
     }
     
+    func getOpacity(_ shading: CardContent.Shading) -> Double {
+        var opacity = 1.0
+        switch shading {
+        case .empty:
+            opacity = 0
+        case .full:
+            opacity = 1
+        case .striped:
+            opacity = 0.2
+        }
+        return opacity
+    }
+    
     
     @ViewBuilder
-    func shapeView(for shapeType: CardContent.ShapeType, color: Color) -> some View {
-            switch shapeType {
+    func shapeView(shape: CardContent.ShapeType, color: Color, shading: CardContent.Shading) -> some View {
+        let strokeWidth = CGFloat(2)
+            switch shape {
             case .diamond:
                 Rectangle()
                     .aspectRatio(1, contentMode: .fit)
                     .foregroundStyle(color)
+                    .opacity(getOpacity(shading))
+                    .overlay(Rectangle().stroke(color, lineWidth: strokeWidth))
                     .rotationEffect(Angle.degrees(45))
 
             case .oval:
                 Ellipse()
                     .foregroundStyle(color)
+                    .opacity(getOpacity(shading))
+                    .overlay(Ellipse().stroke(color, lineWidth: strokeWidth))
 
             case .squiggle:
                 Circle()
                     .foregroundStyle(color)
+                    .opacity(getOpacity(shading))
+                    .overlay(Circle().stroke(color, lineWidth: strokeWidth))
 
             }
+            
         }
 }
 

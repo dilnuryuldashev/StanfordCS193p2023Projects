@@ -78,7 +78,7 @@ class SetGameViewModel: ObservableObject {
     }
     
     static func createSetGame(_ cards: [SetGame<CardContent>.Card]) -> SetGame<CardContent> {
-        return SetGame<CardContent>(cards, visibleCardsCount)
+        return SetGame<CardContent>(cards, visibleCardsCount, CardContent.isSet(_:_:_:))
     }
     
     @Published private var model: SetGame<CardContent>
