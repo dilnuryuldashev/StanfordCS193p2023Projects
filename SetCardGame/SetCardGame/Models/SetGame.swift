@@ -74,6 +74,9 @@ struct SetGame<CardContent: Equatable> {
     mutating func showThreeMoreCards() {
         if currentCardsInPlay < originalCardsInPlayCount {
             currentCardsInPlay += 3
+        } else if currentCardsInPlay > originalCardsInPlayCount {
+            // if we are showing less than originalCardsInPlayCount cards, we fill it to originalCardsInPlayCount
+            currentCardsInPlay -= 3
         }
     }
     
