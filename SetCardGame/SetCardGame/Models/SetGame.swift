@@ -8,6 +8,12 @@
 
 import Foundation
 
+enum MatchResult {
+    case matched
+    case notAMatch
+    case lessThanThreeCardsChosen
+}
+
 struct SetGame<CardContent: Equatable> {
     private(set) var score: Int
     private(set) var cards: Array<Card>
@@ -27,6 +33,7 @@ struct SetGame<CardContent: Equatable> {
         currentCardsInPlay = cardsInPlay
         self.maxCardsInPlay = maxCardsInPlay
     }
+    
     
     // TODO: shuffle the visible cards
     mutating func shuffle() {
@@ -53,6 +60,41 @@ struct SetGame<CardContent: Equatable> {
         return ("", "", "")
     }
     
+    // When user finds three cards that form a SET
+    private mutating func setMatchingState(_ id: String, _ setState: Bool) {
+        let chosenCardIndex = getCardIndex(id: id)
+        
+        if let chosenCardIndex {
+            cards[chosenCardIndex].isInMatchingSet = setState
+        }
+    }
+    
+    mutating func setMatchingStateOfChosenCards(_ setState: Bool) {
+        for card in cards {
+            if card.isChosen {
+                setMatchingState(card.id, setState)
+            }
+        }
+    }
+    
+    mutating func setNonMatchingStateOfChosenCards(_ setState: Bool) {
+        for card in cards {
+            if card.isChosen {
+                setNonMatchingState(card.id, setState)
+            }
+        }
+    }
+    
+    // When user selects three cards not forming a SET
+    private mutating func setNonMatchingState(_ id: String, _ setState: Bool) {
+        let chosenCardIndex = getCardIndex(id: id)
+        
+        if let chosenCardIndex {
+            cards[chosenCardIndex].isInNonMatchingSet = setState
+        }
+
+    }
+    
     mutating func setHintState(_ id: String, _ hintState: Bool) {
         let chosenCardIndex = getCardIndex(id: id)
         
@@ -65,7 +107,9 @@ struct SetGame<CardContent: Equatable> {
     // When players cannot find a set
     // they have an option of dealing three more cards
     mutating func dealThreeCards() {
-        currentCardsInPlay += 3
+        if cards.count > currentCardsInPlay {
+            currentCardsInPlay += 3
+        }
     }
     
     // We only show three more cards after a set
@@ -94,6 +138,11 @@ struct SetGame<CardContent: Equatable> {
                 cards[index].isChosen = false
             }
         }
+        cleanChoosenCards()
+    }
+    
+    private mutating func cleanChoosenCards() {
+        chosenCardIds.removeAll()
     }
     
     
@@ -109,13 +158,17 @@ struct SetGame<CardContent: Equatable> {
             }
         }
         
-        
+        // Empty the array as we will chose new cards
+        chosenCardIds.removeAll()
         print("SetGame deleteChosenCards. cards.count: \(cards.count)")
         print("numberOfDeletions: \(numberOfDeletions)")
         // if the set cards are successfully deleted
         // we need to show three more cards to replace them
         if numberOfDeletions == 3 {
             showThreeMoreCards()
+            // if the number of cards is less than the current cards in play
+            // we just show the remaining cards
+            currentCardsInPlay = min(currentCardsInPlay, cards.count)
         }
     }
     
@@ -124,7 +177,9 @@ struct SetGame<CardContent: Equatable> {
         return chosenCardIndex ?? nil
     }
     
-    mutating func chooseCard(card: Card) {
+    // Return true if there is a SET, and false otherwise
+    // and the function to execute for that case
+    mutating func chooseCard(card: Card) -> MatchResult {
         let chosenCardIndex = getCardIndex(id: card.id)
         
         if let chosenCardIndex {
@@ -138,25 +193,29 @@ struct SetGame<CardContent: Equatable> {
                             // increase the score as we found a SET
                             score += 1
                             // Delete the cards from the deck
-                            deleteChosenCards()
+                            return .matched
                         } else {
                             print("SetGame-chooseCard: not a set")
                             // deselect the cards
-                            resetChosenCards()
                             // peanalize for not forming a SET
                             score -= 1
+                            return .notAMatch
+                            
                         }
-                        
-                        // Empty the array as we will chose new cards
-                        chosenCardIds.removeAll()
-                        
                     }
-                    
 
+                }
+            } else { // deselect the card
+                if chosenCardIds.count < 3 {
+                    if let index = chosenCardIds.firstIndex(of: cards[chosenCardIndex].id) {
+                        chosenCardIds.remove(at: index)
+                    }
                 }
             }
             
         }
+        
+        return .lessThanThreeCardsChosen
     }
     
     struct Card: Identifiable, Equatable {
@@ -164,5 +223,7 @@ struct SetGame<CardContent: Equatable> {
         var content: CardContent
         var isHinted: Bool = false
         var isChosen: Bool = false
+        var isInMatchingSet: Bool = false
+        var isInNonMatchingSet: Bool = false
     }
 }

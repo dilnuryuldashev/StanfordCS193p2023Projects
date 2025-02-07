@@ -16,7 +16,9 @@ import SwiftUI
 
 
 struct CardContent: Equatable {
-    static let colorOptions = [Color.red, Color.green, Color.purple]
+    static let correctColor = Color.green
+    static let incorrectColor = Color.red
+    static let colorOptions = [Color.indigo, Color.orange, Color.teal]
     static let numberOptions = [1, 2, 3]
     
     // we need three way comparison
@@ -55,7 +57,7 @@ struct CardContent: Equatable {
 class SetGameViewModel: ObservableObject {
     private static let visibleCardsCount = 12
     private static let maxVisibleCardsCount = 18 // no more dealing after this point
-
+    private let nanosecondsToWait: UInt64 = 5_000_000_00
     /**
      Source: Wikipedia
      The deck consists of 81 unique cards that vary in four features across three possibilities for each kind of feature:
@@ -102,25 +104,72 @@ class SetGameViewModel: ObservableObject {
         model.score
     }
     
+    
+    @MainActor
     func chooseCard(_ card: SetGame<CardContent>.Card) {
-        model.chooseCard(card: card)
+        if model.chosenCardIds.count != 3 {
+            // we get back a function to execute after showing
+            // the user if it was a set or not
+            let result: MatchResult = model.chooseCard(card: card)
+            if result == .matched {
+                // light them all green
+                // and after one second, remove them from the deck
+                // TODO: Add an animation to make it more appealing
+                
+                Task {
+                    DispatchQueue.main.async {
+                        self.model.setMatchingStateOfChosenCards(true)
+                    }
+                    
+                    try? await Task.sleep(nanoseconds: nanosecondsToWait)
+                    DispatchQueue.main.async {
+                        
+                        self.model.setMatchingStateOfChosenCards(false)
+                        
+                        // Call the relevant function
+                        self.model.deleteChosenCards()
+                    }
+                }
+            } else if result == .notAMatch {
+                // light them all red for one second
+                // TODO: Add an animation to make it more appealing
+                Task {
+                    DispatchQueue.main.async {
+                        self.model.setNonMatchingStateOfChosenCards(true)
+                    }
+                    
+                    try? await Task.sleep(nanoseconds: nanosecondsToWait)
+                    
+                    DispatchQueue.main.async {
+                        self.model.setNonMatchingStateOfChosenCards(false)
+                        // Call the relevant function
+                        self.model.resetChosenCards()
+                    }
+                }
+            }
+        }
+
     }
     
     // Show one SET forming three cards for one second
     // and then reset their states
+    @MainActor
     func cheat() {
         let (i, j, k) = model.getSetFormingTripleIDs()
         
         Task {
-            model.setHintState(i, true)
-            model.setHintState(j, true)
-            model.setHintState(k, true)
+            DispatchQueue.main.async {
+                self.model.setHintState(i, true)
+                self.model.setHintState(j, true)
+                self.model.setHintState(k, true)
+            }
 
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
-            
-            model.setHintState(i, false)
-            model.setHintState(j, false)
-            model.setHintState(k, false)
+            try? await Task.sleep(nanoseconds: nanosecondsToWait)
+            DispatchQueue.main.async {
+                self.model.setHintState(i, false)
+                self.model.setHintState(j, false)
+                self.model.setHintState(k, false)
+            }
         }
     }
     

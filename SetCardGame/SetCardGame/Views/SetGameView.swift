@@ -93,7 +93,8 @@ struct CardView: View {
         ZStack {
             let base = RoundedRectangle(cornerRadius: 12)
             Group {
-                base.fill(.white)
+                let cardColor = card.isInMatchingSet ? CardContent.correctColor : ( card.isInNonMatchingSet ? CardContent.incorrectColor: .white)
+                base.fill(cardColor)
                 base
                     .strokeBorder(lineWidth: 2)
                 GeometryReader { geometry in
@@ -113,8 +114,7 @@ struct CardView: View {
             }
             
             base.fill().opacity(card.isChosen ? 0.4 : 0)
-            base.fill(.red).opacity(card.isHinted ? 0.4 : 0)
-
+            base.fill(.yellow).opacity(card.isHinted ? 0.4 : 0)
         }
     }
     
@@ -145,10 +145,10 @@ struct CardView: View {
                     .rotationEffect(Angle.degrees(45))
 
             case .oval:
-                Ellipse()
+                Capsule()
                     .foregroundStyle(color)
                     .opacity(getOpacity(shading))
-                    .overlay(Ellipse().stroke(color, lineWidth: strokeWidth))
+                    .overlay(Capsule().stroke(color, lineWidth: strokeWidth))
 
             case .squiggle:
                 Circle()
