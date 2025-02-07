@@ -161,6 +161,8 @@ struct CardView: View {
         }
 }
 
+
+
 #Preview {
     SetGameView(viewModel: SetGameViewModel())
 }
