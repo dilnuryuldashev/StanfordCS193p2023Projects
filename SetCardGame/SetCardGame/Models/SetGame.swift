@@ -35,9 +35,20 @@ struct SetGame<CardContent: Equatable> {
     }
     
     
-    // TODO: shuffle the visible cards
+    // Shuffle the whole deck
     mutating func shuffle() {
         cards.shuffle()
+    }
+    
+    // Only shuffle the visible cards
+    mutating func shuffleCardsInPlay() {
+        // shuffle the visible cards
+        var shuffledVisibleCards = cardsToShow.shuffled()
+        
+        // now apply the shuffled version to the overall deck
+        for (index, card) in shuffledVisibleCards.enumerated() {
+            cards[index] = card
+        }
     }
     
     // return three distinct card IDs forming a SET to the user

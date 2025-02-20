@@ -185,8 +185,12 @@ class SetGameViewModel: ObservableObject {
         model.dealThreeCards()
     }
     
-    func shuffle() {
+    private func shuffle() {
         model.shuffle()
+    }
+    
+    func shuffleCardsInPlay(){
+        model.shuffleCardsInPlay()
     }
     
     func newGame() {

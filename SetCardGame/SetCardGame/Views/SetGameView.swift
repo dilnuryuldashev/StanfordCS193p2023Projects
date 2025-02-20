@@ -24,6 +24,9 @@ extension View {
 }
 
 struct SetGameView: View {
+    struct Constants {
+        static let aspectRatio = CGFloat(3) / CGFloat(2)
+    }
     @ObservedObject var viewModel: SetGameViewModel
     @Namespace private var dealingNamespace
     var body: some View {
@@ -62,7 +65,7 @@ struct SetGameView: View {
 
 
             Button("New Game") {
-                withAnimation(.easeInOut(duration: 2)) {
+                withAnimation {
                     viewModel.newGame()
                 }
             }
@@ -77,7 +80,7 @@ struct SetGameView: View {
             
             Button("Shuffle") {
                 withAnimation {
-                    viewModel.shuffle()
+                    viewModel.shuffleCardsInPlay()
                 }
             }
             .setGameButtonStyle()
@@ -87,11 +90,11 @@ struct SetGameView: View {
     }
     
     private var cards: some View {
-        AspectVGrid(viewModel.cardsInPlay, aspectRatio: aspectRatio) { card in
+        AspectVGrid(viewModel.cardsInPlay, aspectRatio: Constants.aspectRatio) { card in
             CardView(card)
                 .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                 .transition(.asymmetric(insertion: .identity, removal: .identity))
-                .aspectRatio(3/2, contentMode: .fit)
+                //.aspectRatio(3/2, contentMode: .fit)
                 .padding(4)
                 .onTapGesture {
                     withAnimation {
