@@ -3,6 +3,7 @@
 //  Memorize
 //
 //  Created by CS193p Instructor on 4/24/23.
+//  Copyright Stanford University 2023
 //
 
 import SwiftUI
@@ -11,13 +12,11 @@ struct AspectVGrid<Item: Identifiable, ItemView: View>: View {
     let items: [Item]
     var aspectRatio: CGFloat = 1
     let content: (Item) -> ItemView
-    var minimumSize: CGFloat
     
-    init(_ items: [Item], aspectRatio: CGFloat, minimumSize: CGFloat, @ViewBuilder content: @escaping (Item) -> ItemView) {
+    init(_ items: [Item], aspectRatio: CGFloat, @ViewBuilder content: @escaping (Item) -> ItemView) {
         self.items = items
         self.aspectRatio = aspectRatio
         self.content = content
-        self.minimumSize = minimumSize
     }
     
     var body: some View {
@@ -27,7 +26,7 @@ struct AspectVGrid<Item: Identifiable, ItemView: View>: View {
                 size: geometry.size,
                 atAspectRatio: aspectRatio
             )
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: minimumSize), spacing: 0)], spacing: 0) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: gridItemSize), spacing: 0)], spacing: 0) {
                 ForEach(items) { item in
                     content(item)
                         .aspectRatio(aspectRatio, contentMode: .fit)
@@ -42,7 +41,7 @@ struct AspectVGrid<Item: Identifiable, ItemView: View>: View {
         atAspectRatio aspectRatio: CGFloat
     ) -> CGFloat {
         let count = CGFloat(count)
-        var columnCount = 3.0
+        var columnCount = 1.0
         repeat {
             let width = size.width / columnCount
             let height = width / aspectRatio
