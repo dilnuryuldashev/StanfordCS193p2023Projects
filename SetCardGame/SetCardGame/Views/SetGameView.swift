@@ -26,9 +26,16 @@ extension View {
 struct SetGameView: View {
     struct Constants {
         static let aspectRatio = CGFloat(3) / CGFloat(2)
+        static let spacing: CGFloat = 4
+        static let dealAnimation: Animation = .easeInOut(duration: 1)
+        static let dealInterval: TimeInterval = 0.15
+        static let deckWidth: CGFloat = 50
     }
+    
     @ObservedObject var viewModel: SetGameViewModel
     @Namespace private var dealingNamespace
+    
+    typealias Card = SetGame<CardContent>.Card
     var body: some View {
         VStack {
             info
@@ -56,13 +63,7 @@ struct SetGameView: View {
     
     var buttons: some View {
         HStack {
-            Button("Deck") {
-                viewModel.dealThreeCards()
-            }
-            .setGameButtonStyle()
-            .disabled(!viewModel.canDealThreeCards)
-            .opacity(!viewModel.canDealThreeCards ? 0.5 : 1)
-
+            deck.foregroundColor(.cyan)
 
             Button("New Game") {
                 withAnimation {
@@ -90,47 +91,61 @@ struct SetGameView: View {
     }
     
     private var cards: some View {
-        AspectVGrid(viewModel.cardsInPlay, aspectRatio: Constants.aspectRatio) { card in
-            CardView(card)
-                .matchedGeometryEffect(id: card.id, in: dealingNamespace)
-                .transition(.asymmetric(insertion: .identity, removal: .identity))
-                //.aspectRatio(3/2, contentMode: .fit)
-                .padding(4)
-                .onTapGesture {
-                    withAnimation {
-                        viewModel.chooseCard(card)
+        AspectVGrid(viewModel.cards, aspectRatio: Constants.aspectRatio) { card in
+            if isDealt(card) {
+                view(for: card)
+                    .padding(Constants.spacing)
+//                    .overlay(FlyingNumber(number: scoreChange(causedBy: card)))
+//                    .zIndex(scoreChange(causedBy: card) != 0 ? 100 : 0)
+                    .onTapGesture {
+                        withAnimation {
+                            viewModel.chooseCard(card)
+                        }
                     }
-                }
+            }
         }
     }
-//    
-//    private func view(for card: Card) -> some View {
-//        CardView(card)
-//            .matchedGeometryEffect(id: card.id, in: dealingNamespace)
-//            .transition(.asymmetric(insertion: .identity, removal: .identity))
-//    }
     
+    
+    // MARK: - Dealing from a Deck
+    
+    @State private var dealt = Set<Card.ID>()
+    
+    private func isDealt(_ card: Card) -> Bool {
+        dealt.contains(card.id)
+    }
+    private var undealtCards: [Card] {
+        viewModel.cards.filter { !isDealt($0) }
+    }
+    
+    
+    private var deck: some View {
+        ZStack {
+            ForEach(undealtCards) { card in
+                view(for: card)
+            }
+        }
+        .frame(width: Constants.deckWidth, height: Constants.deckWidth / Constants.aspectRatio)
+        .onTapGesture {
+            deal()
+        }
+    }
+    
+    private func deal() {
+        var delay: TimeInterval = 0
+        for card in viewModel.cards {
+            withAnimation(Constants.dealAnimation.delay(delay)) {
+                _ = dealt.insert(card.id)
+            }
+            delay += Constants.dealInterval
+        }
+    }
 
-    
-//    var cards: some View {
-//        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 0)]) {
-//            ForEach(viewModel.cardsInPlay) { card in
-//                CardView(card)
-//                    .matchedGeometryEffect(id: card.id, in: dealingNamespace)
-//                    .transition(.asymmetric(insertion: .identity, removal: .identity))
-//                    .aspectRatio(3/2, contentMode: .fit)
-//                    .padding(4)
-//                    .onTapGesture {
-//                        withAnimation {
-//                            viewModel.chooseCard(card)
-//                        }
-//                    }
-//            }
-//        }
-//        .foregroundStyle(.blue)
-//
-//    }
-    
+    private func view(for card: Card) -> some View {
+        CardView(card)
+            .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+            .transition(.asymmetric(insertion: .identity, removal: .identity))
+    }
     
 }
 

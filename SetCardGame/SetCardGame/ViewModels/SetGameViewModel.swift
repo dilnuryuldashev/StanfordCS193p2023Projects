@@ -100,6 +100,10 @@ class SetGameViewModel: ObservableObject {
         model.cardsToShow
     }
     
+    var cards: [SetGame<CardContent>.Card] {
+        model.cards
+    }
+    
     var score: Int {
         model.score
     }
