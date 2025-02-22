@@ -65,6 +65,8 @@ struct SetGameView: View {
 
             Button("New Game") {
                 withAnimation {
+                    discarded.removeAll()
+                    dealt.removeAll()
                     viewModel.newGame()
                 }
             }
