@@ -34,9 +34,8 @@ struct SetGameView: View {
 
     @ObservedObject var viewModel: SetGameViewModel
     @Namespace private var dealingNamespace
-    @Namespace private var discardingNamespace
-
     typealias Card = SetGame<CardContent>.Card
+    
     var body: some View {
         VStack {
             info
@@ -170,14 +169,15 @@ struct SetGameView: View {
         var delay: TimeInterval = 0
         for card in viewModel.cardsInPlay {
             if viewModel.discardedCardIDs.contains(card.id) {
-                withAnimation(Constants.dealAnimation.delay(delay)) {
+               _ = withAnimation(Constants.dealAnimation.delay(delay)) {
                     dealt.remove(card.id)
-                    discarded.insert(card.id)
                 }
                 
-//                _ = withAnimation(Constants.dealAnimation.delay(delay)) {
-//                    discarded.insert(card.id)
-//                }
+                delay += Constants.dealInterval
+
+                _ = withAnimation(Constants.dealAnimation.delay(delay)) {
+                    discarded.insert(card.id)
+                }
                 
                 delay += Constants.dealInterval
             }
@@ -187,7 +187,6 @@ struct SetGameView: View {
     private func view(for card: Card) -> some View {
         CardView(card)
             .matchedGeometryEffect(id: card.id, in: dealingNamespace)
-//            .matchedGeometryEffect(id: "discard\(card.id)", in: discardingNamespace)
 //            .transition(.asymmetric(
 //                insertion: .opacity,
 //                removal: .move(edge: .bottom)

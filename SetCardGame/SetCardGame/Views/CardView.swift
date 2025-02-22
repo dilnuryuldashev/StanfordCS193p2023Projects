@@ -14,21 +14,27 @@ struct CardView: View {
         self.card = card
     }
     
+    struct Constants {
+        static let shapeSpacingDiv: CGFloat = 8
+        static let shapeSizeDiv: CGFloat = 4
+        static let lineWidth: CGFloat = 2
+        static let cornerRadius: CGFloat = 12
+    }
+    
     var body: some View {
         ZStack {
-            let base = RoundedRectangle(cornerRadius: 12)
+            let base = RoundedRectangle(cornerRadius: Constants.cornerRadius)
             Group {
                 let cardColor = card.isInMatchingSet ? CardContent.correctColor : ( card.isInNonMatchingSet ? CardContent.incorrectColor: .white)
                 base.fill(cardColor)
                 base
-                    .strokeBorder(lineWidth: 2)
+                    .strokeBorder(lineWidth: Constants.lineWidth)
                 GeometryReader { geometry in
-                    HStack(spacing: 8) {
+                    HStack(spacing: geometry.size.width / Constants.shapeSpacingDiv) {
                         ForEach(1...(card.content.number), id: \.self) {_ in
                             // TODO: properly draw the shapes
                             shapeView(shape: card.content.shape, color: card.content.color, shading: card.content.shading)
-                                .frame(width: geometry.size.height/3.5, height: geometry.size.width/3.5)
-                                .padding(3)
+                                .frame(width: geometry.size.height / Constants.shapeSizeDiv, height: geometry.size.width / Constants.shapeSizeDiv)
                         }
                         
                     }
@@ -59,7 +65,7 @@ struct CardView: View {
     
     @ViewBuilder
     func shapeView(shape: CardContent.ShapeType, color: Color, shading: CardContent.Shading) -> some View {
-        let strokeWidth = CGFloat(2)
+        let strokeWidth = Constants.lineWidth
             switch shape {
             case .diamond:
                 Rectangle()
