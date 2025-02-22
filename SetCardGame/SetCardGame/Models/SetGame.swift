@@ -14,23 +14,29 @@ enum MatchResult {
     case lessThanThreeCardsChosen
 }
 
-struct SetGame<CardContent: Equatable> {
+struct SetGame<CardContent: Equatable & Hashable> {
     private(set) var score: Int
     private(set) var cards: Array<Card>
+    private(set) var discardedCards: Array<Card> = []
+
     private(set) var chosenCardIds: Array<String> = []
+    private(set) var dealtCards: Set<Card.ID> = []
+    private(set) var discardedCardIDs: Set<Card.ID> = []
+
     private let isSet: (CardContent, CardContent, CardContent) -> Bool
     
     let originalCardsInPlayCount: Int
     let maxCardsInPlay: Int
     
-    private var currentCardsInPlay: Int
+    private var numberOfDealtCards: Int {
+        dealtCards.count
+    }
 
     init(_ cards: [SetGame.Card], _ cardsInPlay: Int, _ maxCardsInPlay: Int, _ isSet: @escaping (CardContent, CardContent, CardContent) -> Bool) {
         self.cards = cards
         self.originalCardsInPlayCount = cardsInPlay
         self.isSet = isSet
         score = 0
-        currentCardsInPlay = cardsInPlay
         self.maxCardsInPlay = maxCardsInPlay
     }
     
@@ -40,14 +46,29 @@ struct SetGame<CardContent: Equatable> {
         cards.shuffle()
     }
     
+    var dealtCardsArray: Array<Card> {
+        cards.filter {
+            dealtCards.contains($0.id)
+        }
+    }
+    
+    var discardedCardsArray: Array<Card> {
+        cards.filter {
+            discardedCardIDs.contains($0.id)
+        }
+    }
+    
+    
     // Only shuffle the visible cards
-    mutating func shuffleCardsInPlay() {
+    mutating func shuffleDealtCards() {
         // shuffle the visible cards
-        var shuffledVisibleCards = cardsToShow.shuffled()
-        
+        let shuffledDealtCards = dealtCardsArray.shuffled()
+
         // now apply the shuffled version to the overall deck
-        for (index, card) in shuffledVisibleCards.enumerated() {
-            cards[index] = card
+        for i in 0..<numberOfDealtCards {
+            if let originalIndex = getCardIndex(id: dealtCardsArray[i].id), let newIndex =  getCardIndex(id: shuffledDealtCards[i].id){ // find dealt card's index in the cards
+                cards.swapAt(originalIndex, newIndex)
+            }
         }
     }
     
@@ -56,9 +77,9 @@ struct SetGame<CardContent: Equatable> {
         // We don't want the previously chosen cards interferring with the hinting process
         resetChosenCards()
         
-        for i in 0..<currentCardsInPlay {
-            for j in i+1..<currentCardsInPlay {
-                for k in j+1..<currentCardsInPlay {
+        for i in 0..<numberOfDealtCards {
+            for j in i+1..<numberOfDealtCards {
+                for k in j+1..<numberOfDealtCards {
                     if i != j && i != k && j != k && isSet(cards[i].content, cards[j].content, cards[k].content) {
                         // only show one SET
                         return (cards[i].id, cards[j].id, cards[k].id)
@@ -117,28 +138,35 @@ struct SetGame<CardContent: Equatable> {
     
     // When players cannot find a set
     // they have an option of dealing three more cards
+    mutating func dealNewGame() {
+        if cards.count > numberOfDealtCards {
+            // There are numberOfDealtCards visible cards
+            // so the starting index from which we start
+            // adding cards is numberOfDealtCards
+            var i = numberOfDealtCards
+            
+            for _ in 0..<originalCardsInPlayCount {
+                dealtCards.insert(cards[i].id)
+                i += 1
+            }
+        }
+    }
+    
+    // When players cannot find a set
+    // they have an option of dealing three more cards
     mutating func dealThreeCards() {
-        if cards.count > currentCardsInPlay {
-            currentCardsInPlay += 3
+        if cards.count > numberOfDealtCards && numberOfDealtCards < maxCardsInPlay { // should not exceed the max number of dealt cards
+            // There are numberOfDealtCards visible cards
+            // so the starting index from which we start
+            // adding cards is numberOfDealtCards
+            var i = numberOfDealtCards
+            
+            for _ in 0..<3 {
+                dealtCards.insert(cards[i].id)
+                i += 1
+            }
         }
     }
-    
-    // We only show three more cards after a set
-    // if currentCardsInPlay is less than the original
-    // number of cards in play
-    mutating func showThreeMoreCards() {
-        if currentCardsInPlay < originalCardsInPlayCount {
-            currentCardsInPlay += 3
-        } else if currentCardsInPlay > originalCardsInPlayCount {
-            // if we are showing less than originalCardsInPlayCount cards, we fill it to originalCardsInPlayCount
-            currentCardsInPlay -= 3
-        }
-    }
-    
-    var cardsToShow: Array<Card> {
-        Array(cards[0..<currentCardsInPlay])
-    }
-    
     
     // After user fails to form a SET
     // We need to reset the cards back to their original states
@@ -149,6 +177,7 @@ struct SetGame<CardContent: Equatable> {
                 cards[index].isChosen = false
             }
         }
+        
         cleanChoosenCards()
     }
     
@@ -160,27 +189,22 @@ struct SetGame<CardContent: Equatable> {
     // Our deck needs to get smaller until there are no cards left
     // So, when a SET is found, we decrease our deck by 3
     mutating func deleteChosenCards() {
-        var numberOfDeletions = 0
         for id in chosenCardIds {
-            let index = getCardIndex(id: id)
-            if let index {
+            if let index = cards.firstIndex(where: {$0.id == id}){
+                // remove the card
+                discardedCards.append(cards[index])
                 cards.remove(at: index)
-                numberOfDeletions += 1
             }
+            
+            discardedCardIDs.insert(id)
+            dealtCards.remove(id)
         }
         
+        print("model discarded = \(discardedCardIDs.count)")
+        print("model dealt = \(dealtCards.count)")
+
         // Empty the array as we will chose new cards
         chosenCardIds.removeAll()
-        print("SetGame deleteChosenCards. cards.count: \(cards.count)")
-        print("numberOfDeletions: \(numberOfDeletions)")
-        // if the set cards are successfully deleted
-        // we need to show three more cards to replace them
-        if numberOfDeletions == 3 {
-            showThreeMoreCards()
-            // if the number of cards is less than the current cards in play
-            // we just show the remaining cards
-            currentCardsInPlay = min(currentCardsInPlay, cards.count)
-        }
     }
     
     private func getCardIndex(id: String) -> Int? {
@@ -229,7 +253,7 @@ struct SetGame<CardContent: Equatable> {
         return .lessThanThreeCardsChosen
     }
     
-    struct Card: Identifiable, Equatable {
+    struct Card: Identifiable, Equatable, Hashable {
         var id: String
         var content: CardContent
         var isHinted: Bool = false

@@ -15,7 +15,7 @@ import SwiftUI
 
 
 
-struct CardContent: Equatable {
+struct CardContent: Equatable, Hashable {
     static let correctColor = Color.green
     static let incorrectColor = Color.red
     static let colorOptions = [Color.indigo, Color.orange, Color.teal]
@@ -94,10 +94,19 @@ class SetGameViewModel: ObservableObject {
         let cards = SetGameViewModel.createCards()
         model = SetGameViewModel.createSetGame(cards)
         shuffle()
+        model.dealNewGame()
     }
     
     var cardsInPlay: [SetGame<CardContent>.Card] {
-        model.cardsToShow
+        model.dealtCardsArray
+    }
+    
+    var discardedCardsArray: [SetGame<CardContent>.Card] {
+        model.discardedCards
+    }
+    
+    var discardedCardIDs: Set<String> {
+        model.discardedCardIDs
     }
     
     var cards: [SetGame<CardContent>.Card] {
@@ -109,7 +118,6 @@ class SetGameViewModel: ObservableObject {
     }
     
     
-    @MainActor
     func chooseCard(_ card: SetGame<CardContent>.Card) {
         if model.chosenCardIds.count != 3 {
             // we get back a function to execute after showing
@@ -118,38 +126,14 @@ class SetGameViewModel: ObservableObject {
             if result == .matched {
                 // light them all green
                 // and after one second, remove them from the deck
-                // TODO: Add an animation to make it more appealing
-                
-                Task {
-                    DispatchQueue.main.async {
-                        self.model.setMatchingStateOfChosenCards(true)
-                    }
-                    
-                    try? await Task.sleep(nanoseconds: nanosecondsToWait)
-                    DispatchQueue.main.async {
-                        
-                        self.model.setMatchingStateOfChosenCards(false)
-                        
-                        // Call the relevant function
-                        self.model.deleteChosenCards()
-                    }
-                }
+                self.model.setMatchingStateOfChosenCards(true)
+                self.model.setMatchingStateOfChosenCards(false)
+                self.model.deleteChosenCards()
             } else if result == .notAMatch {
                 // light them all red for one second
-                // TODO: Add an animation to make it more appealing
-                Task {
-                    DispatchQueue.main.async {
-                        self.model.setNonMatchingStateOfChosenCards(true)
-                    }
-                    
-                    try? await Task.sleep(nanoseconds: nanosecondsToWait)
-                    
-                    DispatchQueue.main.async {
-                        self.model.setNonMatchingStateOfChosenCards(false)
-                        // Call the relevant function
-                        self.model.resetChosenCards()
-                    }
-                }
+                // self.model.setNonMatchingStateOfChosenCards(true)
+                self.model.resetChosenCards()
+                // self.model.setNonMatchingStateOfChosenCards(false)
             }
         }
 
@@ -157,7 +141,6 @@ class SetGameViewModel: ObservableObject {
     
     // Show one SET forming three cards for one second
     // and then reset their states
-    @MainActor
     func cheat() {
         let (i, j, k) = model.getSetFormingTripleIDs()
         
@@ -182,7 +165,7 @@ class SetGameViewModel: ObservableObject {
     }
     
     var canDealThreeCards: Bool {
-        model.cardsToShow.count < SetGameViewModel.maxVisibleCardsCount
+        model.dealtCards.count < SetGameViewModel.maxVisibleCardsCount
     }
     
     func dealThreeCards() {
@@ -194,12 +177,13 @@ class SetGameViewModel: ObservableObject {
     }
     
     func shuffleCardsInPlay(){
-        model.shuffleCardsInPlay()
+        model.shuffleDealtCards()
     }
     
     func newGame() {
         let cards = SetGameViewModel.createCards()
         model = SetGameViewModel.createSetGame(cards)
         shuffle()
+        model.dealNewGame()
     }
 }
