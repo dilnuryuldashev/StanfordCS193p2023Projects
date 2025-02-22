@@ -29,18 +29,20 @@ struct SetGameView: View {
         static let spacing: CGFloat = 4
         static let dealAnimation: Animation = .easeInOut(duration: 1)
         static let dealInterval: TimeInterval = 0.15
-        static let deckWidth: CGFloat = 50
+        static let deckWidth: CGFloat = 80
     }
 
     @ObservedObject var viewModel: SetGameViewModel
     @Namespace private var dealingNamespace
     typealias Card = SetGame<CardContent>.Card
-    
+
     var body: some View {
         VStack {
             info
             cards
                 .padding()
+            Spacer()
+            undealtAndDiscarded
             Spacer()
             buttons
         }
@@ -58,11 +60,23 @@ struct SetGameView: View {
         }
         .padding()
     }
+    
+    var undealtAndDiscarded: some View {
+        HStack {
+            deck.foregroundColor(.cyan)
+            if !viewModel.discardedCardsArray.isEmpty {
+                discardedPile.foregroundColor(.red)
+            }
+        }
+    }
 
     var buttons: some View {
         HStack {
-            deck.foregroundColor(.cyan)
-
+            Button("Cheat") {
+                viewModel.cheat()
+            }
+            .setGameButtonStyle()
+            
             Button("New Game") {
                 withAnimation {
                     discarded.removeAll()
@@ -72,19 +86,12 @@ struct SetGameView: View {
             }
             .setGameButtonStyle()
 
-            Button("Cheat") {
-                viewModel.cheat()
-            }
-            .setGameButtonStyle()
-
             Button("Shuffle") {
                 withAnimation(.bouncy(duration: 1)) {
                     viewModel.shuffleCardsInPlay()
                 }
             }
             .setGameButtonStyle()
-
-            discardedPile.foregroundColor(.red)
         }
         .padding()
     }
