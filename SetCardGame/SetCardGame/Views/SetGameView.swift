@@ -75,7 +75,7 @@ struct SetGameView: View {
         HStack {
             deck
                 .padding(.horizontal)
-            
+
             if !viewModel.discardedCardsArray.isEmpty {
                 discardedPile
                     .padding(.horizontal)
@@ -124,8 +124,6 @@ struct SetGameView: View {
             if isDealt(card) {
                 view(for: card)
                     .padding(Constants.spacing)
-//                    .overlay(FlyingNumber(number: scoreChange(causedBy: card)))
-//                    .zIndex(scoreChange(causedBy: card) != 0 ? 100 : 0)
                     .onTapGesture {
                         handleCardSelection(card)
                     }
@@ -185,7 +183,7 @@ struct SetGameView: View {
 
     private var deck: some View {
         ZStack {
-            ForEach(Array(undealtCards.prefix(3).enumerated()), id: \.element.id) { index, card in
+            ForEach(Array(undealtCards.enumerated().reversed()), id: \.element.id) { index, card in
                 view(for: card)
                     .rotationEffect(.degrees(degreeBasedOnIndex(index)))
                     .offset(offsetBasedOnIndex(index))
@@ -196,18 +194,18 @@ struct SetGameView: View {
             deal()
         }
     }
-    
+
     private func degreeBasedOnIndex(_ index: Int) -> Double {
-        -10 + Double(index) * 10
+        -10 + Double(index % 3) * 10
     }
-    
-    private func offsetBasedOnIndex(_ index: Int) -> CGSize{
-        CGSize(width: (-10 + Double(index) * 10), height: Double(0))
+
+    private func offsetBasedOnIndex(_ index: Int) -> CGSize {
+        CGSize(width: -10 + Double(index % 3) * 10, height: Double(0))
     }
 
     private var discardedPile: some View {
         ZStack {
-            ForEach(Array(viewModel.discardedCardsArray.prefix(3).enumerated()), id: \.element.id) { index, card in
+            ForEach(Array(viewModel.discardedCardsArray.enumerated()), id: \.element.id) { index, card in
                 view(for: card)
                     .rotationEffect(.degrees(degreeBasedOnIndex(index)))
                     .offset(offsetBasedOnIndex(index))

@@ -56,9 +56,7 @@ struct SetGame<CardContent: Equatable & Hashable> {
     }
     
     var discardedCardsArray: Array<Card> {
-        cards.filter {
-            discardedCardIDs.contains($0.id)
-        }
+        discardedCards
     }
     
     
