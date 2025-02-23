@@ -28,6 +28,8 @@ struct SetGame<CardContent: Equatable & Hashable> {
     let originalCardsInPlayCount: Int
     let maxCardsInPlay: Int
     
+    private var cheatTrioIDs: [String]
+    
     private var numberOfDealtCards: Int {
         dealtCards.count
     }
@@ -38,6 +40,7 @@ struct SetGame<CardContent: Equatable & Hashable> {
         self.isSet = isSet
         score = 0
         self.maxCardsInPlay = maxCardsInPlay
+        self.cheatTrioIDs = []
     }
     
     
@@ -72,8 +75,14 @@ struct SetGame<CardContent: Equatable & Hashable> {
         }
     }
     
+    mutating func resetCheatTrioIDs() {
+        for id in cheatTrioIDs {
+            setHintState(id, false)
+        }
+    }
+    
     // return three distinct card IDs forming a SET to the user
-    mutating func getSetFormingTripleIDs() -> (String, String, String){
+    mutating func cheat() {
         // We don't want the previously chosen cards interferring with the hinting process
         resetChosenCards()
         
@@ -82,14 +91,15 @@ struct SetGame<CardContent: Equatable & Hashable> {
                 for k in j+1..<numberOfDealtCards {
                     if i != j && i != k && j != k && isSet(cards[i].content, cards[j].content, cards[k].content) {
                         // only show one SET
-                        return (cards[i].id, cards[j].id, cards[k].id)
+                        cheatTrioIDs = [cards[i].id, cards[j].id, cards[k].id]
+                        cards[i].isHinted = true
+                        cards[j].isHinted = true
+                        cards[k].isHinted = true
+                        return
                     }
                 }
             }
         }
-        
-        // SET not Found
-        return ("", "", "")
     }
     
     // When user finds three cards that form a SET

@@ -24,12 +24,17 @@ extension View {
 }
 
 struct SetGameView: View {
-    enum Constants {
+    struct Constants {
         static let aspectRatio = CGFloat(3) / CGFloat(2)
         static let spacing: CGFloat = 4
         static let dealAnimation: Animation = .easeInOut(duration: 1)
         static let dealInterval: TimeInterval = 0.15
         static let deckWidth: CGFloat = 80
+        
+        struct Hint {
+            static let showHideDuration: TimeInterval = 1
+            static let delay: TimeInterval = 1
+        }
     }
 
     @ObservedObject var viewModel: SetGameViewModel
@@ -69,11 +74,21 @@ struct SetGameView: View {
             }
         }
     }
+    
+    private func cheat() {
+        withAnimation(.easeIn(duration: Constants.Hint.showHideDuration)) {
+            viewModel.cheat()
+        }
+        
+        withAnimation(.easeOut(duration: Constants.Hint.showHideDuration).delay(Constants.Hint.delay)) {
+            viewModel.resetCheating()
+        }
+    }
 
     var buttons: some View {
         HStack {
             Button("Cheat") {
-                viewModel.cheat()
+                cheat()
             }
             .setGameButtonStyle()
             

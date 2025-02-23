@@ -139,25 +139,13 @@ class SetGameViewModel: ObservableObject {
 
     }
     
-    // Show one SET forming three cards for one second
-    // and then reset their states
+    // Select one SET forming three cards
     func cheat() {
-        let (i, j, k) = model.getSetFormingTripleIDs()
-        
-        Task {
-            DispatchQueue.main.async {
-                self.model.setHintState(i, true)
-                self.model.setHintState(j, true)
-                self.model.setHintState(k, true)
-            }
-
-            try? await Task.sleep(nanoseconds: nanosecondsToWait)
-            DispatchQueue.main.async {
-                self.model.setHintState(i, false)
-                self.model.setHintState(j, false)
-                self.model.setHintState(k, false)
-            }
-        }
+        model.cheat()
+    }
+    
+    func resetCheating() {
+        model.resetCheatTrioIDs()
     }
     
     var deckSize: Int {

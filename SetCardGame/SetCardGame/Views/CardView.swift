@@ -44,8 +44,8 @@ struct CardView: View {
                 
             }
             
-            base.fill().opacity(card.isChosen ? 0.4 : 0)
-            base.fill(.yellow).opacity(card.isHinted ? 0.4 : 0)
+            base.fill().opacity(card.isChosen ? 0.5 : 0)
+            base.fill(.yellow).opacity(card.isHinted ? 0.5 : 0)
         }
     }
     
