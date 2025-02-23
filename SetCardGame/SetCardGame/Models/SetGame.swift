@@ -201,6 +201,7 @@ struct SetGame<CardContent: Equatable & Hashable> {
     mutating func deleteChosenCards() {
         for id in chosenCardIds {
             if let index = cards.firstIndex(where: {$0.id == id}){
+                cards[index].isChosen = false
                 // remove the card
                 discardedCards.append(cards[index])
                 cards.remove(at: index)
@@ -263,6 +264,12 @@ struct SetGame<CardContent: Equatable & Hashable> {
         return .lessThanThreeCardsChosen
     }
     
+    mutating func setCardFaceUpState(_ card: Card, _ state: Bool) {
+        if let index = getCardIndex(id: card.id) {
+            cards[index].isFaceUp = state
+        }
+    }
+    
     struct Card: Identifiable, Equatable, Hashable {
         var id: String
         var content: CardContent
@@ -270,5 +277,6 @@ struct SetGame<CardContent: Equatable & Hashable> {
         var isChosen: Bool = false
         var isInMatchingSet: Bool = false
         var isInNonMatchingSet: Bool = false
+        var isFaceUp: Bool = false
     }
 }

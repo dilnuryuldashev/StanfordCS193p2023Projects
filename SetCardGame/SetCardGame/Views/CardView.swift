@@ -17,7 +17,7 @@ struct CardView: View {
     struct Constants {
         static let shapeSpacingDiv: CGFloat = 8
         static let shapeSizeDiv: CGFloat = 4
-        static let lineWidth: CGFloat = 2
+        static let lineWidth: CGFloat = 1
         static let cornerRadius: CGFloat = 12
     }
     
@@ -27,8 +27,7 @@ struct CardView: View {
             Group {
                 let cardColor = card.isInMatchingSet ? CardContent.correctColor : ( card.isInNonMatchingSet ? CardContent.incorrectColor: .white)
                 base.fill(cardColor)
-                base
-                    .strokeBorder(lineWidth: Constants.lineWidth)
+                
                 GeometryReader { geometry in
                     HStack(spacing: geometry.size.width / Constants.shapeSpacingDiv) {
                         ForEach(1...(card.content.number), id: \.self) {_ in
@@ -44,8 +43,11 @@ struct CardView: View {
                 
             }
             
-            base.fill().opacity(card.isChosen ? 0.5 : 0)
+            base.fill(.yellow).opacity(card.isChosen ? 0.5 : 0)
             base.fill(.yellow).opacity(card.isHinted ? 0.5 : 0)
+            base.fill(.cyan).opacity(card.isFaceUp ? 0 : 1)
+            base
+                .strokeBorder(lineWidth: Constants.lineWidth)
         }
     }
     

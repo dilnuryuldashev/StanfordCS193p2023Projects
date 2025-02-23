@@ -88,7 +88,7 @@ class SetGameViewModel: ObservableObject {
     }
     
     @Published private var model: SetGame<CardContent>
-
+    typealias SetCard = SetGame<CardContent>.Card
     
     init() {
         let cards = SetGameViewModel.createCards()
@@ -117,26 +117,40 @@ class SetGameViewModel: ObservableObject {
         model.score
     }
     
+    func setMatchingStateOfChosenCards(_ state: Bool) {
+        model.setMatchingStateOfChosenCards(state)
+    }
     
-    func chooseCard(_ card: SetGame<CardContent>.Card) {
-        if model.chosenCardIds.count != 3 {
+    func setNonMatchingStateOfChosenCards(_ state: Bool) {
+        model.setNonMatchingStateOfChosenCards(state)
+    }
+    
+    func deleteChosenCards() {
+        model.deleteChosenCards()
+    }
+    
+    func resetChosenCards() {
+        model.resetChosenCards()
+    }
+    
+    func setCardFaceUpState(_ card: SetCard, _ state: Bool) {
+        model.setCardFaceUpState(card, state)
+    }
+    
+    func chooseCard(_ card: SetCard) -> MatchResult {
+        if model.chosenCardIds.count != 3 { // we are adding one more card here
             // we get back a function to execute after showing
             // the user if it was a set or not
             let result: MatchResult = model.chooseCard(card: card)
             if result == .matched {
-                // light them all green
-                // and after one second, remove them from the deck
-                self.model.setMatchingStateOfChosenCards(true)
-                self.model.setMatchingStateOfChosenCards(false)
-                self.model.deleteChosenCards()
+                return .matched
             } else if result == .notAMatch {
-                // light them all red for one second
-                // self.model.setNonMatchingStateOfChosenCards(true)
-                self.model.resetChosenCards()
-                // self.model.setNonMatchingStateOfChosenCards(false)
+                return .notAMatch
+
             }
         }
-
+        
+        return .lessThanThreeCardsChosen
     }
     
     // Select one SET forming three cards
